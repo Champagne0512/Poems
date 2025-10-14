@@ -33,30 +33,44 @@
     <!-- 现代化英雄区域 -->
     <section class="modern-hero">
       <div class="hero-background">
+        <div class="background-overlay"></div>
         <div class="floating-elements">
           <div class="floating-element element-1">🌸</div>
           <div class="floating-element element-2">📜</div>
           <div class="floating-element element-3">🎭</div>
           <div class="floating-element element-4">🖋️</div>
+          <div class="floating-element element-5">🌙</div>
+          <div class="floating-element element-6">🏞️</div>
         </div>
+        <div class="chinese-pattern"></div>
       </div>
       <div class="hero-content">
         <div class="hero-text">
-          <h2 class="hero-title">
-            <span class="title-line">探索千年</span>
-            <span class="title-line highlight">诗词之美</span>
-          </h2>
+          <div class="title-container">
+            <h2 class="hero-title">
+              <span class="title-line">探索千年</span>
+              <span class="title-line highlight">诗词之美</span>
+            </h2>
+            <div class="title-decoration">
+              <div class="decoration-line"></div>
+              <div class="decoration-dot"></div>
+              <div class="decoration-line"></div>
+            </div>
+          </div>
           <p class="hero-subtitle">沉浸式体验中华诗词文化的博大精深</p>
           <div class="hero-stats">
             <div class="stat-item">
+              <div class="stat-icon">📚</div>
               <span class="stat-number">5000+</span>
               <span class="stat-label">首诗词</span>
             </div>
             <div class="stat-item">
+              <div class="stat-icon">👨‍🎨</div>
               <span class="stat-number">300+</span>
               <span class="stat-label">位诗人</span>
             </div>
             <div class="stat-item">
+              <div class="stat-icon">⏳</div>
               <span class="stat-number">10+</span>
               <span class="stat-label">个朝代</span>
             </div>
@@ -64,11 +78,13 @@
         </div>
         <div class="hero-search">
           <div class="search-container">
-            <input type="text" placeholder="搜索诗词、作者或朝代..." class="modern-search-input">
-            <button class="modern-search-btn">
-              <span>开始探索</span>
-              <span class="arrow">→</span>
-            </button>
+            <div class="search-wrapper">
+              <input type="text" placeholder="搜索诗词、作者或朝代..." class="modern-search-input">
+              <button class="modern-search-btn">
+                <span class="search-icon">🔍</span>
+                <span>开始探索</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -466,11 +482,12 @@ const deactivateCategory = () => {
 /* 现代化英雄区域 */
 .modern-hero {
   position: relative;
-  min-height: 80vh;
+  min-height: 90vh;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 25%, #0f3460 50%, #533483 75%, #8b5cf6 100%);
 }
 
 .hero-background {
@@ -479,27 +496,57 @@ const deactivateCategory = () => {
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  z-index: -1;
+  z-index: 1;
+}
+
+.background-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: 
+    radial-gradient(circle at 20% 30%, rgba(139, 92, 246, 0.3) 0%, transparent 50%),
+    radial-gradient(circle at 80% 70%, rgba(83, 52, 131, 0.4) 0%, transparent 50%),
+    radial-gradient(circle at 40% 50%, rgba(31, 41, 55, 0.6) 0%, transparent 50%);
+  animation: backgroundShift 15s ease-in-out infinite;
+}
+
+.chinese-pattern {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.05) 2px, transparent 2px),
+    radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 50px 50px, 30px 30px;
+  opacity: 0.3;
 }
 
 .floating-elements {
   position: absolute;
   width: 100%;
   height: 100%;
+  z-index: 2;
 }
 
 .floating-element {
   position: absolute;
-  font-size: 3rem;
-  opacity: 0.3;
-  animation: float 6s ease-in-out infinite;
+  font-size: 4rem;
+  opacity: 0.6;
+  animation: float 8s ease-in-out infinite;
+  filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.3));
+  z-index: 2;
 }
 
-.element-1 { top: 20%; left: 10%; animation-delay: 0s; }
-.element-2 { top: 60%; right: 15%; animation-delay: 2s; }
-.element-3 { bottom: 30%; left: 20%; animation-delay: 4s; }
-.element-4 { top: 40%; right: 25%; animation-delay: 1s; }
+.element-1 { top: 15%; left: 8%; animation-delay: 0s; }
+.element-2 { top: 65%; right: 12%; animation-delay: 2s; }
+.element-3 { bottom: 25%; left: 15%; animation-delay: 4s; }
+.element-4 { top: 35%; right: 20%; animation-delay: 1s; }
+.element-5 { top: 8%; right: 25%; animation-delay: 3s; font-size: 3.5rem; }
+.element-6 { bottom: 15%; right: 8%; animation-delay: 5s; font-size: 3rem; }
 
 .hero-content {
   max-width: 1200px;
@@ -509,293 +556,174 @@ const deactivateCategory = () => {
   grid-template-columns: 1fr 1fr;
   gap: 4rem;
   align-items: center;
+  position: relative;
+  z-index: 3;
 }
 
 .hero-text {
-  color: rgba(255, 255, 255, 0.98);
+  color: white;
+}
+
+.title-container {
+  margin-bottom: 2rem;
 }
 
 .hero-title {
-  font-size: 4rem;
+  font-size: 3.5rem;
   font-weight: 800;
   line-height: 1.1;
-  margin-bottom: 1.5rem;
-  text-shadow: 0 4px 30px rgba(0, 0, 0, 0.8),
-               0 0 80px rgba(255, 215, 0, 0.3),
-               0 0 120px rgba(70, 130, 180, 0.2);
+  margin-bottom: 1rem;
+  text-align: left;
 }
 
 .title-line {
   display: block;
-  animation: textGlow 3s ease-in-out infinite alternate;
   position: relative;
-  color: rgba(255, 255, 255, 0.95);
 }
 
 .title-line:first-child {
-  animation-delay: 0s;
+  color: rgba(255, 255, 255, 0.95);
+  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.8);
 }
 
 .title-line.highlight {
-  background: linear-gradient(135deg, #ffd700 0%, #ff8c00 25%, #ff4500 50%, #da70d6 75%, #00bfff 100%);
+  background: linear-gradient(135deg, #ffd700 0%, #ff8c00 25%, #ff6b6b 50%, #8b5cf6 75%, #00bfff 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  background-size: 400% 400%;
-  animation: gradientShift 8s ease-in-out infinite, textGlow 3s ease-in-out infinite alternate;
-  animation-delay: 0s, 1s;
-  text-shadow: 0 0 60px rgba(255, 215, 0, 0.7),
-               0 0 120px rgba(255, 140, 0, 0.5),
-               0 0 180px rgba(218, 112, 214, 0.3);
-  position: relative;
-  z-index: 2;
+  background-size: 300% 300%;
+  animation: gradientShift 6s ease-in-out infinite;
+  text-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
 }
 
-.title-line.highlight::before {
-  content: '';
-  position: absolute;
-  top: -8px;
-  left: -15px;
-  right: -15px;
-  bottom: -8px;
-  background: linear-gradient(135deg, 
-    rgba(255, 215, 0, 0.3), 
-    rgba(255, 140, 0, 0.3), 
-    rgba(255, 69, 0, 0.3),
-    rgba(218, 112, 214, 0.3),
-    rgba(0, 191, 255, 0.3));
-  border-radius: 15px;
-  z-index: -1;
-  filter: blur(25px);
-  animation: glowPulse 6s ease-in-out infinite;
+.title-decoration {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.decoration-line {
+  flex: 1;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+}
+
+.decoration-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ffd700;
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
 }
 
 .hero-subtitle {
-  font-size: 1.3rem;
-  margin-bottom: 2rem;
+  font-size: 1.4rem;
+  margin-bottom: 3rem;
   line-height: 1.6;
-  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.7),
-               0 0 60px rgba(255, 255, 255, 0.2);
-  animation: fadeInUp 1s ease-out 0.5s both;
-  font-weight: 500;
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 400;
   letter-spacing: 0.5px;
-  color: rgba(255, 255, 255, 0.9);
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.5);
 }
 
 .hero-stats {
   display: flex;
   gap: 2rem;
-  margin-bottom: 2rem;
-  animation: fadeInUp 1s ease-out 0.8s both;
-  position: relative;
-  z-index: 2;
+  margin-bottom: 3rem;
 }
 
 .stat-item {
   text-align: center;
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(20px);
-  padding: 1.5rem 2rem;
-  border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(15px);
+  padding: 1.5rem;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
   transition: all 0.4s ease;
-  position: relative;
-  overflow: hidden;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-}
-
-.stat-item::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-  transition: left 0.6s ease;
-}
-
-.stat-item:hover::before {
-  left: 100%;
+  min-width: 120px;
 }
 
 .stat-item:hover {
-  transform: translateY(-8px) scale(1.05);
-  background: rgba(255, 255, 255, 0.25);
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3),
-              inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  transform: translateY(-5px);
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
-.stat-number {
-  display: block;
-  font-size: 2.8rem;
-  font-weight: 800;
+.stat-icon {
+  font-size: 2rem;
   margin-bottom: 0.5rem;
-  background: linear-gradient(135deg, #ffffff 0%, #ffd700 25%, #ff8c00 50%, #ffffff 75%, #00bfff 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-size: 200% 200%;
-  animation: gradientShift 6s ease-in-out infinite;
-  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.8),
-               0 0 60px rgba(255, 215, 0, 0.4),
-               0 0 100px rgba(0, 191, 255, 0.2);
-  filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.5));
-  letter-spacing: -1px;
-}
-
-.stat-label {
-  font-size: 0.95rem;
-  font-weight: 600;
-  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.6);
-  letter-spacing: 0.5px;
-  color: rgba(255, 255, 255, 0.9);
-}
-
-/* 深色背景板效果 */
-.hero-background {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 25%, #16213e 50%, #0f3460 75%, #533483 100%);
-  z-index: -1;
-  overflow: hidden;
-}
-
-.hero-background::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: 
-    radial-gradient(circle at 20% 20%, rgba(83, 52, 131, 0.4) 0%, transparent 50%),
-    radial-gradient(circle at 80% 80%, rgba(31, 97, 141, 0.3) 0%, transparent 50%),
-    radial-gradient(circle at 40% 60%, rgba(22, 33, 62, 0.5) 0%, transparent 50%),
-    radial-gradient(circle at 60% 30%, rgba(26, 26, 46, 0.6) 0%, transparent 50%);
-  animation: backgroundShift 10s ease-in-out infinite;
-}
-
-.hero-background::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: 
-    linear-gradient(45deg, transparent 40%, rgba(255, 255, 255, 0.05) 50%, transparent 60%),
-    linear-gradient(-45deg, transparent 30%, rgba(255, 255, 255, 0.03) 40%, transparent 50%);
-  animation: shimmer 4s ease-in-out infinite;
-}
-
-.hero-background-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: 
-    radial-gradient(circle at center, rgba(255, 255, 255, 0.02) 0%, transparent 70%),
-    repeating-linear-gradient(0deg, transparent 0%, rgba(255, 255, 255, 0.01) 1px, transparent 2px);
-  animation: subtlePulse 8s ease-in-out infinite;
-}
-
-.floating-elements {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  z-index: 1;
-}
-
-.floating-element {
-  position: absolute;
-  font-size: 4rem;
-  opacity: 0.4;
-  animation: float 6s ease-in-out infinite;
-  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.5));
-  z-index: 1;
-}
-
-.element-1 { top: 20%; left: 10%; animation-delay: 0s; }
-.element-2 { top: 60%; right: 15%; animation-delay: 2s; }
-.element-3 { bottom: 30%; left: 20%; animation-delay: 4s; }
-.element-4 { top: 40%; right: 25%; animation-delay: 1s; }
-.element-5 { top: 10%; right: 30%; animation-delay: 3s; font-size: 3rem; }
-.element-6 { bottom: 20%; right: 10%; animation-delay: 5s; font-size: 3.5rem; }
-
-.hero-stats {
-  display: flex;
-  gap: 2rem;
-  margin-bottom: 2rem;
-}
-
-.stat-item {
-  text-align: center;
+  display: block;
 }
 
 .stat-number {
   display: block;
-  font-size: 2.5rem;
+  font-size: 2.2rem;
   font-weight: 700;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.25rem;
+  color: white;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
 }
 
 .stat-label {
   font-size: 0.9rem;
-  opacity: 0.8;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 500;
 }
 
 .hero-search {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
   border-radius: 20px;
-  padding: 2rem;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 2.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
 }
 
-.search-container {
+.search-wrapper {
   display: flex;
   gap: 1rem;
+  align-items: center;
 }
 
 .modern-search-input {
   flex: 1;
   padding: 1rem 1.5rem;
-  border: none;
-  border-radius: 15px;
-  background: rgba(255, 255, 255, 0.9);
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  background: white;
   font-size: 1rem;
   transition: all 0.3s ease;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .modern-search-input:focus {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3);
+  border-color: #8b5cf6;
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
 }
 
 .modern-search-btn {
   padding: 1rem 2rem;
-  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+  background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
   color: white;
   border: none;
-  border-radius: 15px;
+  border-radius: 12px;
   font-weight: 600;
   cursor: pointer;
   display: flex;
   align-items: center;
   gap: 0.5rem;
   transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
 }
 
 .modern-search-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 10px 20px rgba(255, 107, 107, 0.3);
+  box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
 }
 
-.arrow {
-  font-size: 1.2rem;
+.search-icon {
+  font-size: 1.1rem;
 }
 
 /* 精选诗词区域 */

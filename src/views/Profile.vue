@@ -151,25 +151,42 @@ const deleteComment = (commentId) => {
 
 <style scoped>
 .profile {
-  font-family: 'Microsoft YaHei', sans-serif;
-  background: #f8f5f0;
-  min-height: calc(100vh - 120px);
-  padding: 2rem 0;
+  font-family: 'STKaiti', 'KaiTi', 'SimSun', serif;
+  background: linear-gradient(135deg, #8B7355 0%, #A1887F 50%, #BCAAA4 100%);
+  min-height: 100vh;
+  padding: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.profile::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="%23ffffff" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+  pointer-events: none;
 }
 
 .profile-container {
-  max-width: 800px;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 0 2rem;
+  position: relative;
+  z-index: 1;
 }
 
 .profile-header {
-  background: white;
-  padding: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  margin-bottom: 2rem;
-  border: 1px solid #e8e4da;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  padding: 3rem 2rem;
+  border-radius: 0 0 30px 30px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  margin-bottom: 0;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-top: none;
 }
 
 .user-info {
@@ -187,12 +204,18 @@ const deleteComment = (commentId) => {
 
 .user-details h1 {
   margin: 0 0 0.5rem 0;
-  color: #5d4037;
+  color: #5D4037;
+  font-size: 2.5rem;
+  font-weight: 700;
+  text-shadow: 2px 2px 4px rgba(139, 115, 85, 0.3);
+  letter-spacing: 2px;
 }
 
 .user-bio {
-  color: #8b7355;
+  color: #4a5568;
   margin-bottom: 1rem;
+  font-size: 1.1rem;
+  line-height: 1.6;
 }
 
 .user-stats {
@@ -206,20 +229,26 @@ const deleteComment = (commentId) => {
 
 .stat-number {
   display: block;
-  font-size: 1.5rem;
+  font-size: 2rem;
   font-weight: bold;
-  color: #8b7355;
+  color: #4facfe;
 }
 
 .stat-label {
-  font-size: 0.9rem;
-  color: #a1887f;
+  font-size: 1rem;
+  color: #4a5568;
+  font-weight: 500;
 }
 
 .tabs {
   display: flex;
-  border-bottom: 1px solid #ddd;
-  margin-bottom: 2rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+  margin: 3rem 0 2rem 0;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 15px;
+  padding: 0.5rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
 
 .tab {
@@ -227,19 +256,22 @@ const deleteComment = (commentId) => {
   background: none;
   border: none;
   cursor: pointer;
-  border-bottom: 2px solid transparent;
+  border-radius: 10px;
   transition: all 0.3s;
-  color: #8b7355;
+  color: #4a5568;
+  font-weight: 500;
+  flex: 1;
 }
 
 .tab.active {
-  border-bottom-color: #8b7355;
-  color: #5d4037;
-  font-weight: bold;
+  background: linear-gradient(135deg, #8B7355, #A1887F);
+  color: white;
+  font-weight: 600;
+  box-shadow: 0 4px 15px rgba(139, 115, 85, 0.3);
 }
 
 .tab:hover {
-  background: #f8f5f0;
+  background: rgba(79, 172, 254, 0.1);
 }
 
 .collection-list,
@@ -253,41 +285,49 @@ const deleteComment = (commentId) => {
 .collection-item,
 .comment-item,
 .history-item {
-  background: white;
-  padding: 1.5rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(20px);
+  padding: 2rem;
+  border-radius: 15px;
+  box-shadow: 
+    0 4px 20px rgba(139, 115, 85, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
   cursor: pointer;
-  transition: all 0.3s;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
-  border: 1px solid #e8e4da;
+  border: 1px solid rgba(139, 115, 85, 0.1);
+  margin-bottom: 1.5rem;
 }
 
 .collection-item:hover,
 .comment-item:hover,
 .history-item:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.15);
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
 }
 
 .remove-btn,
 .delete-btn {
   position: absolute;
-  top: 1rem;
-  right: 1rem;
-  padding: 0.25rem 0.5rem;
-  background: #a1887f;
+  top: 1.5rem;
+  right: 1.5rem;
+  padding: 0.5rem 1rem;
+  background: linear-gradient(135deg, #8B7355, #A1887F);
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 8px;
   cursor: pointer;
-  font-size: 0.8rem;
-  transition: background 0.3s;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.3s;
+  box-shadow: 0 2px 10px rgba(139, 115, 85, 0.3);
+  font-family: 'STKaiti', 'KaiTi', serif;
 }
 
 .remove-btn:hover,
 .delete-btn:hover {
-  background: #8d6e63;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(79, 172, 254, 0.4);
 }
 
 .comment-header {
@@ -314,11 +354,12 @@ const deleteComment = (commentId) => {
 
 .empty-state {
   text-align: center;
-  padding: 3rem;
-  color: #a1887f;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e8e4da;
+  padding: 4rem 2rem;
+  color: #4a5568;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 </style>
