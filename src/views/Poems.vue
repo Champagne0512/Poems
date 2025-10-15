@@ -16,10 +16,14 @@
       </div>
     </div>
     
-    <div class="poem-grid">
+    <div v-if="loading" class="loading">
+      <p>加载中...</p>
+    </div>
+    
+    <div v-else class="poem-grid">
       <div v-for="poem in filteredPoems" :key="poem.id" class="poem-item" @click="viewPoem(poem.id)">
-        <div class="poem-image" v-if="poem.image">
-          <img :src="poem.image" :alt="poem.title" class="poem-img">
+        <div class="poem-image">
+          <img :src="poem.image || './OIP.jpg'" :alt="poem.title" class="poem-img">
         </div>
         <h3 class="poem-title">{{ poem.title }}</h3>
         <p class="poem-meta">{{ poem.author }} · {{ poem.dynasty }}</p>
@@ -32,161 +36,30 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useSupabaseStore } from '../stores/supabase'
 
 const router = useRouter()
+const supabaseStore = useSupabaseStore()
 
-// 诗词数据
-const poems = ref([
-  {
-    id: 1,
-    title: '静夜思',
-    author: '李白',
-    dynasty: '唐代',
-    content: '床前明月光，疑是地上霜。\n举头望明月，低头思故乡。',
-    image: './OIP.jpg'
-  },
-  {
-    id: 2,
-    title: '春晓',
-    author: '孟浩然',
-    dynasty: '唐代',
-    content: '春眠不觉晓，处处闻啼鸟。\n夜来风雨声，花落知多少。',
-    image: './OIP.jpg'
-  },
-  {
-    id: 3,
-    title: '登鹳雀楼',
-    author: '王之涣',
-    dynasty: '唐代',
-    content: '白日依山尽，黄河入海流。\n欲穷千里目，更上一层楼。',
-    image: './OIP.jpg'
-  },
-  {
-    id: 4,
-    title: '相思',
-    author: '王维',
-    dynasty: '唐代',
-    content: '红豆生南国，春来发几枝。\n愿君多采撷，此物最相思。',
-    image: './OIP.jpg'
-  },
-  {
-    id: 5,
-    title: '江雪',
-    author: '柳宗元',
-    dynasty: '唐代',
-    content: '千山鸟飞绝，万径人踪灭。\n孤舟蓑笠翁，独钓寒江雪。',
-    image: './OIP.jpg'
-  },
-  {
-    id: 6,
-    title: '望庐山瀑布',
-    author: '李白',
-    dynasty: '唐代',
-    content: '日照香炉生紫烟，遥看瀑布挂前川。\n飞流直下三千尺，疑是银河落九天。',
-    image: './OIP.jpg'
-  },
-  {
-    id: 7,
-    title: '悯农',
-    author: '李绅',
-    dynasty: '唐代',
-    content: '锄禾日当午，汗滴禾下土。\n谁知盘中餐，粒粒皆辛苦。',
-    image: './OIP.jpg'
-  },
-  {
-    id: 8,
-    title: '清明',
-    author: '杜牧',
-    dynasty: '唐代',
-    content: '清明时节雨纷纷，路上行人欲断魂。\n借问酒家何处有，牧童遥指杏花村。',
-    image: './OIP.jpg'
-  },
-  {
-    id: 9,
-    title: '黄鹤楼送孟浩然之广陵',
-    author: '李白',
-    dynasty: '唐代',
-    content: '故人西辞黄鹤楼，烟花三月下扬州。\n孤帆远影碧空尽，唯见长江天际流。',
-    image: './OIP.jpg'
-  },
-  {
-    id: 10,
-    title: '枫桥夜泊',
-    author: '张继',
-    dynasty: '唐代',
-    content: '月落乌啼霜满天，江枫渔火对愁眠。\n姑苏城外寒山寺，夜半钟声到客船。',
-    image: './OIP.jpg'
-  },
-  {
-    id: 11,
-    title: '游子吟',
-    author: '孟郊',
-    dynasty: '唐代',
-    content: '慈母手中线，游子身上衣。\n临行密密缝，意恐迟迟归。\n谁言寸草心，报得三春晖。',
-    image: './OIP.jpg'
-  },
-  {
-    id: 12,
-    title: '望岳',
-    author: '杜甫',
-    dynasty: '唐代',
-    content: '岱宗夫如何？齐鲁青未了。\n造化钟神秀，阴阳割昏晓。\n荡胸生曾云，决眦入归鸟。\n会当凌绝顶，一览众山小。',
-    image: './OIP.jpg'
-  },
-  {
-    id: 13,
-    title: '水调歌头·明月几时有',
-    author: '苏轼',
-    dynasty: '宋代',
-    content: '明月几时有？把酒问青天。\n不知天上宫阙，今夕是何年。\n我欲乘风归去，又恐琼楼玉宇，高处不胜寒。\n起舞弄清影，何似在人间。',
-    image: './OIP.jpg'
-  },
-  {
-    id: 14,
-    title: '声声慢·寻寻觅觅',
-    author: '李清照',
-    dynasty: '宋代',
-    content: '寻寻觅觅，冷冷清清，凄凄惨惨戚戚。\n乍暖还寒时候，最难将息。\n三杯两盏淡酒，怎敌他、晚来风急？\n雁过也，正伤心，却是旧时相识。',
-    image: './OIP.jpg'
-  },
-  {
-    id: 15,
-    title: '青玉案·元夕',
-    author: '辛弃疾',
-    dynasty: '宋代',
-    content: '东风夜放花千树，更吹落、星如雨。\n宝马雕车香满路。\n凤箫声动，玉壶光转，一夜鱼龙舞。',
-    image: './OIP.jpg'
-  },
-  {
-    id: 16,
-    title: '天净沙·秋思',
-    author: '马致远',
-    dynasty: '元代',
-    content: '枯藤老树昏鸦，小桥流水人家，古道西风瘦马。\n夕阳西下，断肠人在天涯。',
-    image: './OIP.jpg'
-  },
-  {
-    id: 17,
-    title: '石灰吟',
-    author: '于谦',
-    dynasty: '明代',
-    content: '千锤万凿出深山，烈火焚烧若等闲。\n粉骨碎身浑不怕，要留清白在人间。',
-    image: './OIP.jpg'
-  },
-  {
-    id: 18,
-    title: '己亥杂诗',
-    author: '龚自珍',
-    dynasty: '清代',
-    content: '九州生气恃风雷，万马齐喑究可哀。\n我劝天公重抖擞，不拘一格降人才。',
-    image: './OIP.jpg'
-  }
-])
-
+const poems = ref([])
 const selectedDynasty = ref('')
 const selectedAuthor = ref('')
+const loading = ref(true)
+
+// 从Supabase加载诗词数据
+onMounted(async () => {
+  loading.value = true
+  try {
+    await supabaseStore.fetchPoems()
+    poems.value = supabaseStore.poems
+  } catch (error) {
+    console.error('加载诗词数据失败:', error)
+  } finally {
+    loading.value = false
+  }
+})
 
 // 获取所有朝代和作者
 const dynasties = computed(() => [...new Set(poems.value.map(p => p.dynasty))])
@@ -281,6 +154,18 @@ const viewPoem = (poemId) => {
 .filter-controls select:focus {
   outline: none;
   border-color: #8b7355;
+}
+
+.loading {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: #4a5568;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  margin: 3rem auto;
+  max-width: 1200px;
 }
 
 .poem-grid {
