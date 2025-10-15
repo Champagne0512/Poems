@@ -4,16 +4,16 @@ import { supabase } from '../utils/supabase.js'
 export const useSupabaseStore = defineStore('supabase', {
   state: () => ({
     poems: [],
-    user: null,
-    loading: false,
-    error: null
+    favorites: [],
+    history: [],
+    loading: false
   }),
 
   actions: {
     // 获取所有诗词
     async fetchPoems() {
-      this.loading = true
       try {
+        this.loading = true
         const { data, error } = await supabase
           .from('poems')
           .select('*')
@@ -23,8 +23,8 @@ export const useSupabaseStore = defineStore('supabase', {
         this.poems = data || []
         return data
       } catch (error) {
-        this.error = error.message
         console.error('获取诗词失败:', error)
+        return []
       } finally {
         this.loading = false
       }
@@ -32,7 +32,6 @@ export const useSupabaseStore = defineStore('supabase', {
 
     // 根据ID获取诗词详情
     async fetchPoemById(id) {
-      this.loading = true
       try {
         const { data, error } = await supabase
           .from('poems')
@@ -43,17 +42,13 @@ export const useSupabaseStore = defineStore('supabase', {
         if (error) throw error
         return data
       } catch (error) {
-        this.error = error.message
         console.error('获取诗词详情失败:', error)
         return null
-      } finally {
-        this.loading = false
       }
     },
 
     // 搜索诗词
     async searchPoems(query) {
-      this.loading = true
       try {
         const { data, error } = await supabase
           .from('poems')
@@ -64,99 +59,13 @@ export const useSupabaseStore = defineStore('supabase', {
         if (error) throw error
         return data || []
       } catch (error) {
-        this.error = error.message
         console.error('搜索诗词失败:', error)
         return []
-      } finally {
-        this.loading = false
       }
     },
 
-    // 用户登录
-    async signIn(email, password) {
-      try {
-        const { data, error } = await supabase.auth.signInWithPassword({
-          email,
-          password
-        })
-        
-        if (error) throw error
-        this.user = data.user
-        return data
-      } catch (error) {
-        this.error = error.message
-        throw error
-      }
-    },
-
-    // 用户注册
-    async signUp(email, password, userData = {}) {
-      try {
-        const { data, error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            data: userData
-          }
-        })
-        
-        if (error) throw error
-        return data
-      } catch (error) {
-        this.error = error.message
-        throw error
-      }
-    },
-
-    // 用户登出
-    async signOut() {
-      try {
-        const { error } = await supabase.auth.signOut()
-        if (error) throw error
-        this.user = null
-      } catch (error) {
-        this.error = error.message
-        throw error
-      }
-    },
-
-    // 获取当前用户
-    async getCurrentUser() {
-      try {
-        const { data: { user } } = await supabase.auth.getUser()
-        this.user = user
-        return user
-      } catch (error) {
-        this.error = error.message
-        return null
-      }
-    },
-
-    // 添加收藏
-    async addFavorite(poemId) {
-      if (!this.user) throw new Error('请先登录')
-      
-      try {
-        const { data, error } = await supabase
-          .from('favorites')
-          .insert({
-            user_id: this.user.id,
-            poem_id: poemId
-          })
-          .select()
-        
-        if (error) throw error
-        return data
-      } catch (error) {
-        this.error = error.message
-        throw error
-      }
-    },
-
-    // 获取用户收藏
+    // 获取收藏列表
     async getFavorites() {
-      if (!this.user) return []
-      
       try {
         const { data, error } = await supabase
           .from('favorites')
@@ -164,12 +73,119 @@ export const useSupabaseStore = defineStore('supabase', {
             poem_id,
             poems (*)
           `)
-          .eq('user_id', this.user.id)
         
         if (error) throw error
-        return data.map(item => item.poems) || []
+        return data?.map(item => item.poems) || []
       } catch (error) {
-        this.error = error.message
+        console.error('获取收藏失败:', error)
+        return []
+      }
+    },
+
+    // 添加收藏
+    async addFavorite(poemId) {
+      try {
+        const { error } = await supabase
+          .from('favorites')
+          .insert({ poem_id: poemId })
+        
+        if (error) throw error
+        return true
+      } catch (error) {
+        console.error('添加收藏失败:', error)
+        return false
+      }
+    },
+
+    // 移除收藏
+    async removeFavorite(poemId) {
+      try {
+        const { error } = await supabase
+          .from('favorites')
+          .delete()
+          .eq('poem_id', poemId)
+        
+        if (error) throw error
+        return true
+      } catch (error) {
+        console.error('移除收藏失败:', error)
+        return false
+      }
+    },
+
+    // 添加浏览历史
+    async addHistory(poemId) {
+      try {
+        const { error } = await supabase
+          .from('history')
+          .insert({ 
+            poem_id: poemId,
+            viewed_at: new Date().toISOString()
+          })
+        
+        if (error) throw error
+        return true
+      } catch (error) {
+        console.error('添加历史失败:', error)
+        return false
+      }
+    },
+
+    // 获取浏览历史
+    async getHistory() {
+      try {
+        const { data, error } = await supabase
+          .from('history')
+          .select(`
+            viewed_at,
+            poems (*)
+          `)
+          .order('viewed_at', { ascending: false })
+          .limit(20)
+        
+        if (error) throw error
+        return data?.map(item => ({
+          ...item.poems,
+          timestamp: item.viewed_at
+        })) || []
+      } catch (error) {
+        console.error('获取历史失败:', error)
+        return []
+      }
+    },
+
+    // 添加评论
+    async addComment(poemId, content) {
+      try {
+        const { error } = await supabase
+          .from('comments')
+          .insert({
+            poem_id: poemId,
+            content: content,
+            created_at: new Date().toISOString()
+          })
+        
+        if (error) throw error
+        return true
+      } catch (error) {
+        console.error('添加评论失败:', error)
+        return false
+      }
+    },
+
+    // 获取评论
+    async fetchComments(poemId) {
+      try {
+        const { data, error } = await supabase
+          .from('comments')
+          .select('*')
+          .eq('poem_id', poemId)
+          .order('created_at', { ascending: false })
+        
+        if (error) throw error
+        return data || []
+      } catch (error) {
+        console.error('获取评论失败:', error)
         return []
       }
     }

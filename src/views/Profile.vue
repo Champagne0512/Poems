@@ -11,7 +11,7 @@
       <div class="profile-sidebar">
         <div class="user-info">
           <div class="avatar">
-            <img src="./OIP.jpg" alt="用户头像" class="avatar-img">
+            <img src="/images/OIP.jpg" alt="用户头像" class="avatar-img">
           </div>
           <h3 class="username">诗词爱好者</h3>
           <p class="user-bio">热爱古典诗词，传承中华文化</p>

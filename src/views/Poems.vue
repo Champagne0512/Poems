@@ -23,7 +23,7 @@
     <div v-else class="poem-grid">
       <div v-for="poem in filteredPoems" :key="poem.id" class="poem-item" @click="viewPoem(poem.id)">
         <div class="poem-image">
-          <img :src="poem.image || './OIP.jpg'" :alt="poem.title" class="poem-img">
+          <img :src="poem.image_url || '/images/OIP.jpg'" :alt="poem.title" class="poem-img">
         </div>
         <h3 class="poem-title">{{ poem.title }}</h3>
         <p class="poem-meta">{{ poem.author }} · {{ poem.dynasty }}</p>
