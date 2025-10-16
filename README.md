@@ -173,17 +173,115 @@ CREATE TABLE browse_history (
 - 遵循古风设计规范
 - 确保响应式兼容性
 
-## 部署
+## GitHub部署配置
 
-### Vercel部署
+项目已配置GitHub Actions自动化部署，支持Vercel和Supabase数据库迁移。
+
+### GitHub Actions工作流
+
+项目包含两个自动化工作流：
+
+1. **自动部署到Vercel** (`/.github/workflows/deploy.yml`)
+   - 在推送到main/master分支时自动触发
+   - 自动构建和部署到Vercel
+   - 集成环境变量管理
+
+2. **Supabase数据库迁移** (`/.github/workflows/supabase-migrations.yml`)
+   - 在数据库迁移文件变更时自动运行
+   - 自动推送数据库变更到Supabase
+
+### 环境变量配置
+
+在GitHub仓库的Settings → Secrets and variables → Actions中添加以下secrets：
+
+| Secret名称 | 描述 | 获取方式 |
+|-----------|------|----------|
+| `VERCEL_TOKEN` | Vercel访问令牌 | Vercel账户设置 → Tokens |
+| `VERCEL_ORG_ID` | Vercel组织ID | Vercel项目设置 |
+| `VERCEL_PROJECT_ID` | Vercel项目ID | Vercel项目设置 |
+| `SUPABASE_ACCESS_TOKEN` | Supabase访问令牌 | Supabase账户设置 → Access Tokens |
+| `SUPABASE_PROJECT_ID` | Supabase项目ID | Supabase项目设置 |
+| `VITE_SUPABASE_URL` | Supabase项目URL | Supabase项目设置 |
+| `VITE_SUPABASE_ANON_KEY` | Supabase匿名密钥 | Supabase项目设置 |
+
+### 部署步骤
+
+1. **Fork或克隆仓库**
+   ```bash
+   git clone https://github.com/your-username/poetry-website.git
+   cd poetry-website
+   ```
+
+2. **配置GitHub Secrets**
+   - 按照上述表格配置所有必要的secrets
+
+3. **推送代码到GitHub**
+   ```bash
+   git add .
+   git commit -m "Initial commit"
+   git push origin main
+   ```
+
+4. **查看部署状态**
+   - 在GitHub仓库的Actions标签页查看部署状态
+   - 部署成功后访问Vercel提供的域名
+
+### 手动部署选项
+
+#### Vercel部署（推荐）
 1. 连接GitHub仓库到Vercel
 2. 配置环境变量
 3. 自动部署
 
-### Netlify部署
+#### Netlify部署
 1. 连接GitHub仓库到Netlify
 2. 配置构建命令和环境变量
 3. 部署网站
+
+### 数据库迁移
+
+项目包含完整的数据库迁移文件：
+
+```bash
+# 迁移文件执行顺序
+supabase/migrations/001_initial_schema.sql    # 表结构和函数
+supabase/migrations/002_utility_functions.sql # 实用函数
+supabase/migrations/003_sample_data.sql       # 示例诗词数据
+supabase/migrations/004_interaction_data.sql  # 用户互动数据
+```
+
+使用Supabase CLI手动运行迁移：
+```bash
+supabase db push
+```
+
+## 项目状态徽章
+
+在README中添加项目状态徽章：
+
+[![Deploy to Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/your-username/poetry-website)
+[![GitHub Actions](https://github.com/your-username/poetry-website/actions/workflows/deploy.yml/badge.svg)](https://github.com/your-username/poetry-website/actions)
+
+## 故障排除
+
+### 常见问题
+
+1. **构建失败**
+   - 检查Node.js版本兼容性
+   - 验证环境变量配置
+
+2. **数据库连接错误**
+   - 检查Supabase项目状态
+   - 验证数据库迁移是否成功
+
+3. **部署失败**
+   - 查看GitHub Actions日志
+   - 检查Vercel部署日志
+
+### 获取帮助
+
+- 查看详细部署指南: [DEPLOYMENT.md](DEPLOYMENT.md)
+- 提交Issue: [GitHub Issues](https://github.com/your-username/poetry-website/issues)
 
 ## 贡献指南
 

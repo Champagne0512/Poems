@@ -92,7 +92,9 @@ export const usePoemStore = defineStore('poem', () => {
 
   // 方法
   const getPoemById = (id) => {
-    return poems.value.find(poem => poem.id === parseInt(id))
+    // 处理数字ID和字符串ID
+    const idNum = parseInt(id)
+    return poems.value.find(poem => poem.id === idNum || poem.id.toString() === id)
   }
 
   const searchPoems = (query) => {

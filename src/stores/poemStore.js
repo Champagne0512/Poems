@@ -28,6 +28,11 @@ export const usePoemStore = defineStore('poem', {
     // 检查诗词是否被收藏
     isFavorite: (state) => (poemId) => {
       return state.userFavorites.has(poemId)
+    },
+
+    // 根据ID获取诗词
+    getPoemById: (state) => (id) => {
+      return state.poems.find(poem => poem.id === id) || null
     }
   },
 
