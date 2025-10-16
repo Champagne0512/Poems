@@ -1,1220 +1,467 @@
 <template>
   <div class="home">
-    <!-- 现代化导航栏 -->
-    <nav class="modern-nav">
-      <div class="nav-container">
-        <div class="nav-brand">
-          <div class="logo-wrapper">
-            <span class="logo-icon">📚</span>
-            <h1 class="logo">诗词雅集</h1>
-          </div>
-        </div>
-        <div class="nav-menu">
-          <router-link to="/" class="nav-link active">首页</router-link>
-          <router-link to="/poems" class="nav-link">诗词浏览</router-link>
-          <router-link to="/search" class="nav-link">搜索</router-link>
-          <router-link to="/profile" class="nav-link">个人中心</router-link>
-        </div>
-        <div class="nav-actions">
-          <div class="search-wrapper">
-            <input type="text" placeholder="搜索诗词..." class="search-input">
-            <button class="search-btn">
-              <span class="search-icon">🔍</span>
-            </button>
-          </div>
-          <div class="auth-buttons">
-            <button class="btn-login">登录</button>
-            <button class="btn-register">注册</button>
-          </div>
-        </div>
-      </div>
-    </nav>
-
-    <!-- 现代化英雄区域 -->
-    <section class="modern-hero">
-      <div class="hero-background">
-        <div class="background-overlay"></div>
-        <div class="floating-elements">
-          <div class="floating-element element-1">🌸</div>
-          <div class="floating-element element-2">📜</div>
-          <div class="floating-element element-3">🎭</div>
-          <div class="floating-element element-4">🖋️</div>
-          <div class="floating-element element-5">🌙</div>
-          <div class="floating-element element-6">🏞️</div>
-        </div>
-        <div class="chinese-pattern"></div>
-      </div>
+    <!-- 英雄区域 -->
+    <section class="hero">
       <div class="hero-content">
-        <div class="hero-text">
-          <div class="title-container">
-            <h2 class="hero-title">
-              <span class="title-line">探索千年</span>
-              <span class="title-line highlight">诗词之美</span>
-            </h2>
-            <div class="title-decoration">
-              <div class="decoration-line"></div>
-              <div class="decoration-dot"></div>
-              <div class="decoration-line"></div>
-            </div>
+        <h1 class="hero-title">诗词赏析</h1>
+        <p class="hero-subtitle">品味千年文化，感受诗词魅力</p>
+        <div class="hero-stats">
+          <div class="stat-item">
+            <span class="stat-number">5000+</span>
+            <span class="stat-label">首诗词</span>
           </div>
-          <p class="hero-subtitle">沉浸式体验中华诗词文化的博大精深</p>
-          <div class="hero-stats">
-            <div class="stat-item">
-              <div class="stat-icon">📚</div>
-              <span class="stat-number">5000+</span>
-              <span class="stat-label">首诗词</span>
-            </div>
-            <div class="stat-item">
-              <div class="stat-icon">👨‍🎨</div>
-              <span class="stat-number">300+</span>
-              <span class="stat-label">位诗人</span>
-            </div>
-            <div class="stat-item">
-              <div class="stat-icon">⏳</div>
-              <span class="stat-number">10+</span>
-              <span class="stat-label">个朝代</span>
-            </div>
+          <div class="stat-item">
+            <span class="stat-number">300+</span>
+            <span class="stat-label">位诗人</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-number">10+</span>
+            <span class="stat-label">个朝代</span>
           </div>
         </div>
-        <div class="hero-search">
-          <div class="search-container">
-            <div class="search-wrapper">
-              <input type="text" placeholder="搜索诗词、作者或朝代..." class="modern-search-input">
-              <button class="modern-search-btn">
-                <span class="search-icon">🔍</span>
-                <span>开始探索</span>
-              </button>
-            </div>
-          </div>
+        <div class="hero-actions">
+          <button class="btn btn-primary" @click="navigateToPoems">开始探索</button>
+          <button class="btn btn-secondary" @click="navigateToSearch">搜索诗词</button>
         </div>
+      </div>
+      <div class="hero-background">
+        <div class="bg-pattern"></div>
       </div>
     </section>
 
-    <!-- 精选诗词卡片区 -->
+    <!-- 精选诗词 -->
     <section class="featured-section">
-      <div class="container">
-        <div class="section-header">
-          <h3 class="section-title">精选诗词</h3>
-          <p class="section-subtitle">经典诗词，永恒传颂</p>
-        </div>
-        <div class="featured-grid">
-          <div v-for="(poem, index) in featuredPoems" :key="poem.id" 
-               class="featured-card" 
-               :style="{ animationDelay: `${index * 0.1}s` }"
-               @click="viewPoem(poem.id)">
-            <div class="card-gradient"></div>
-            <div class="card-content">
-              <div class="poem-header">
-                <h4 class="poem-title">{{ poem.title }}</h4>
-                <span class="poem-badge">{{ poem.dynasty }}</span>
-              </div>
-              <p class="poem-author">{{ poem.author }}</p>
-              <div class="poem-excerpt">
-                {{ poem.excerpt }}
-              </div>
-              <div class="card-footer">
-                <span class="read-more">阅读全文 →</span>
-              </div>
+      <div class="section-header">
+        <h2>精选诗词</h2>
+        <p>经典佳作，值得细细品味</p>
+      </div>
+      <div v-if="isLoading" class="loading">加载中...</div>
+      <div v-else-if="featuredPoems.length === 0" class="no-data">
+        <p>暂无诗词数据，请先添加诗词到数据库</p>
+      </div>
+      <div v-else class="featured-poems">
+        <div v-for="poem in featuredPoems" :key="poem.id" class="poem-card" @click="viewPoem(poem.id)">
+          <div class="poem-card-content">
+            <h3 class="poem-title">{{ poem.title }}</h3>
+            <p class="poem-author">{{ poem.author }} · {{ poem.dynasty }}</p>
+            <p class="poem-excerpt">{{ getPoemExcerpt(poem.content) }}</p>
+            <div class="poem-meta">
+              <span class="favorite-count">❤️ {{ poem.favorite_count || 0 }}</span>
             </div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- 动态分类展示 -->
-    <section class="categories-section">
-      <div class="container">
-        <div class="section-header">
-          <h3 class="section-title">诗词分类</h3>
-          <p class="section-subtitle">按主题浏览经典诗词</p>
-        </div>
-        <div class="categories-grid">
-          <div v-for="category in categories" :key="category.id" 
-               class="category-card" 
-               @mouseenter="activateCategory(category.id)"
-               @mouseleave="deactivateCategory">
-            <div class="category-content">
-              <div class="category-icon">{{ category.icon }}</div>
-              <h4 class="category-name">{{ category.name }}</h4>
-              <p class="category-count">{{ category.count }}首</p>
-            </div>
-            <div class="category-hover">
-              <span>探索更多</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 热门诗词排行榜 -->
+    <!-- 热门排行 -->
     <section class="popular-section">
-      <div class="container">
-        <div class="section-header">
-          <h3 class="section-title">热门诗词</h3>
-          <p class="section-subtitle">最受读者喜爱的经典作品</p>
-        </div>
-        <div class="popular-list">
-          <div v-for="poem in popularPoems" :key="poem.id" 
-               class="popular-item" 
-               @click="viewPoem(poem.id)">
-            <div class="rank-badge">
-              <span class="rank-number">#{{ poem.rank }}</span>
-            </div>
-            <div class="poem-info">
-              <h4 class="poem-title">{{ poem.title }}</h4>
-              <p class="poem-author">{{ poem.author }}</p>
-            </div>
-            <div class="popular-stats">
-              <div class="stat">
-                <span class="stat-icon">👁️</span>
-                <span class="stat-value">{{ poem.views }}</span>
-              </div>
-            </div>
+      <div class="section-header">
+        <h2>热门排行</h2>
+        <p>最受欢迎的诗词作品</p>
+      </div>
+      <div v-if="isLoading" class="loading">加载中...</div>
+      <div v-else-if="popularPoems.length === 0" class="no-data">
+        <p>暂无热门诗词数据</p>
+      </div>
+      <div v-else class="popular-list">
+        <div v-for="poem in popularPoems" :key="poem.id" class="popular-item" @click="viewPoem(poem.id)">
+          <div class="rank">{{ poem.rank }}</div>
+          <div class="poem-info">
+            <h4 class="poem-title">{{ poem.title }}</h4>
+            <p class="poem-meta">{{ poem.author }} · {{ poem.dynasty }}</p>
           </div>
+          <div class="views">{{ poem.view_count || 0 }} 浏览</div>
         </div>
       </div>
     </section>
 
-    <!-- 现代化页脚 -->
-    <footer class="modern-footer">
-      <div class="container">
-        <div class="footer-content">
-          <div class="footer-main">
-            <div class="footer-brand">
-              <span class="footer-logo-icon">📚</span>
-              <h3>诗词雅集</h3>
-              <p>传承中华文化，品味诗词之美</p>
-            </div>
-            <div class="footer-links">
-              <div class="link-group">
-                <h4>快速导航</h4>
-                <a href="#">唐诗精选</a>
-                <a href="#">宋词欣赏</a>
-                <a href="#">元曲经典</a>
-                <a href="#">明清诗词</a>
-              </div>
-              <div class="link-group">
-                <h4>诗人名录</h4>
-                <a href="#">李白</a>
-                <a href="#">杜甫</a>
-                <a href="#">苏轼</a>
-                <a href="#">李清照</a>
-              </div>
-              <div class="link-group">
-                <h4>关于我们</h4>
-                <a href="#">团队介绍</a>
-                <a href="#">联系我们</a>
-                <a href="#">加入我们</a>
-                <a href="#">帮助中心</a>
-              </div>
-            </div>
-          </div>
-          <div class="footer-bottom">
-            <p>&copy; 2024 诗词雅集 - 让诗词之美触手可及</p>
-            <div class="social-links">
-              <a href="#" class="social-link">微信</a>
-              <a href="#" class="social-link">微博</a>
-              <a href="#" class="social-link">知乎</a>
-            </div>
-          </div>
+    <!-- 快速导航 -->
+    <section class="quick-nav">
+      <div class="nav-grid">
+        <div class="nav-item" @click="navigateToPoems">
+          <div class="nav-icon">📚</div>
+          <h3>全部诗词</h3>
+          <p>浏览完整的诗词库</p>
+        </div>
+        <div class="nav-item" @click="navigateToSearch">
+          <div class="nav-icon">🔍</div>
+          <h3>搜索诗词</h3>
+          <p>快速找到心仪的诗词</p>
+        </div>
+        <div class="nav-item" @click="navigateToProfile">
+          <div class="nav-icon">👤</div>
+          <h3>个人中心</h3>
+          <p>管理收藏和评论</p>
         </div>
       </div>
-    </footer>
+    </section>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { supabase } from '@/utils/supabase'
 
 const router = useRouter()
-const activeCategory = ref(null)
+const featuredPoems = ref([])
+const popularPoems = ref([])
+const isLoading = ref(true)
 
-// 精选诗词数据
-const featuredPoems = ref([
-  {
-    id: 1,
-    title: '静夜思',
-    author: '李白',
-    dynasty: '唐代',
-    excerpt: '床前明月光，疑是地上霜。举头望明月，低头思故乡。'
-  },
-  {
-    id: 2,
-    title: '春晓',
-    author: '孟浩然',
-    dynasty: '唐代',
-    excerpt: '春眠不觉晓，处处闻啼鸟。夜来风雨声，花落知多少。'
-  },
-  {
-    id: 3,
-    title: '登鹳雀楼',
-    author: '王之涣',
-    dynasty: '唐代',
-    excerpt: '白日依山尽，黄河入海流。欲穷千里目，更上一层楼。'
-  },
-  {
-    id: 4,
-    title: '相思',
-    author: '王维',
-    dynasty: '唐代',
-    excerpt: '红豆生南国，春来发几枝。愿君多采撷，此物最相思。'
-  },
-  {
-    id: 5,
-    title: '江雪',
-    author: '柳宗元',
-    dynasty: '唐代',
-    excerpt: '千山鸟飞绝，万径人踪灭。孤舟蓑笠翁，独钓寒江雪。'
-  },
-  {
-    id: 6,
-    title: '望庐山瀑布',
-    author: '李白',
-    dynasty: '唐代',
-    excerpt: '日照香炉生紫烟，遥看瀑布挂前川。飞流直下三千尺，疑是银河落九天。'
-  }
-])
-
-// 分类数据
-const categories = ref([
-  { id: 1, name: '唐诗', icon: '📜', count: 300 },
-  { id: 2, name: '宋词', icon: '🌸', count: 250 },
-  { id: 3, name: '元曲', icon: '🎭', count: 150 },
-  { id: 4, name: '山水', icon: '🏞️', count: 120 },
-  { id: 5, name: '离别', icon: '👋', count: 80 },
-  { id: 6, name: '爱情', icon: '💕', count: 90 }
-])
-
-// 热门诗词数据
-const popularPoems = ref([
-  { id: 1, rank: 1, title: '静夜思', author: '李白', views: 12560 },
-  { id: 2, rank: 2, title: '春晓', author: '孟浩然', views: 9870 },
-  { id: 3, rank: 3, title: '登鹳雀楼', author: '王之涣', views: 8560 },
-  { id: 4, rank: 4, title: '相思', author: '王维', views: 7430 },
-  { id: 5, rank: 5, title: '江雪', author: '柳宗元', views: 6890 },
-  { id: 6, rank: 6, title: '悯农', author: '李绅', views: 5670 }
-])
+// 获取诗词摘要
+const getPoemExcerpt = (content) => {
+  if (!content) return '暂无内容'
+  const firstLine = content.split('\n')[0]
+  return firstLine.length > 50 ? firstLine.substring(0, 50) + '...' : firstLine
+}
 
 // 页面加载动画
-onMounted(() => {
-  // 添加页面加载动画
-  setTimeout(() => {
-    document.querySelector('.modern-hero').classList.add('loaded')
-  }, 100)
+onMounted(async () => {
+  try {
+    console.log('开始加载诗词数据...')
+    
+    // 直接使用Supabase获取数据
+    const { data: poemsData, error } = await supabase
+      .from('poems')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(10)
+    
+    if (error) {
+      console.error('Supabase查询错误:', error)
+      throw error
+    }
+    
+    console.log('从Supabase获取到的数据:', poemsData)
+    
+    if (poemsData && poemsData.length > 0) {
+      // 精选诗词 - 取最新的3首
+      featuredPoems.value = poemsData.slice(0, 3)
+      
+      // 热门排行 - 按收藏数排序
+      const sortedPoems = [...poemsData].sort((a, b) => (b.favorite_count || 0) - (a.favorite_count || 0))
+      popularPoems.value = sortedPoems.slice(0, 6).map((poem, index) => ({
+        ...poem,
+        rank: index + 1
+      }))
+      
+      console.log('精选诗词:', featuredPoems.value)
+      console.log('热门排行:', popularPoems.value)
+    } else {
+      console.log('Supabase中没有诗词数据')
+      featuredPoems.value = []
+      popularPoems.value = []
+    }
+  } catch (error) {
+    console.error('加载诗词数据失败:', error)
+    featuredPoems.value = []
+    popularPoems.value = []
+  } finally {
+    isLoading.value = false
+  }
 })
+
+// 导航方法
+const navigateToPoems = () => {
+  router.push('/poems')
+}
+
+const navigateToSearch = () => {
+  router.push('/search')
+}
+
+const navigateToProfile = () => {
+  router.push('/profile')
+}
 
 const viewPoem = (poemId) => {
   router.push(`/poem/${poemId}`)
-}
-
-const activateCategory = (categoryId) => {
-  activeCategory.value = categoryId
-}
-
-const deactivateCategory = () => {
-  activeCategory.value = null
 }
 </script>
 
 <style scoped>
 .home {
-  font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  font-family: var(--font-ui);
   min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
 }
 
-/* 现代化导航栏 */
-.modern-nav {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-}
-
-.nav-container {
-  max-width: 1400px;
-  margin: 0 auto;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 1rem 2rem;
-}
-
-.logo-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.logo-icon {
-  font-size: 2rem;
-  animation: float 3s ease-in-out infinite;
-}
-
-.logo {
-  color: #2d3748;
-  font-size: 1.8rem;
-  font-weight: 700;
-  margin: 0;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.nav-menu {
-  display: flex;
-  gap: 2rem;
-}
-
-.nav-link {
-  color: #4a5568;
-  text-decoration: none;
-  font-weight: 500;
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
-  transition: all 0.3s ease;
+.hero {
   position: relative;
-}
-
-.nav-link:hover,
-.nav-link.active {
-  color: #667eea;
-  background: rgba(102, 126, 234, 0.1);
-}
-
-.nav-link.active::after {
-  content: '';
-  position: absolute;
-  bottom: -8px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 6px;
-  height: 6px;
-  background: #667eea;
-  border-radius: 50%;
-}
-
-.nav-actions {
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
-}
-
-.search-wrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.search-input {
-  padding: 0.75rem 3rem 0.75rem 1rem;
-  border: 1px solid #e2e8f0;
-  border-radius: 25px;
-  background: #f7fafc;
-  width: 250px;
-  font-size: 0.9rem;
-  transition: all 0.3s ease;
-}
-
-.search-input:focus {
-  outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-}
-
-.search-btn {
-  position: absolute;
-  right: 8px;
-  background: #667eea;
-  border: none;
-  border-radius: 50%;
-  width: 32px;
-  height: 32px;
+  min-height: 60vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.search-btn:hover {
-  background: #5a67d8;
-  transform: scale(1.1);
-}
-
-.auth-buttons {
-  display: flex;
-  gap: 0.75rem;
-}
-
-.btn-login,
-.btn-register {
-  padding: 0.75rem 1.5rem;
-  border: 2px solid #667eea;
-  border-radius: 25px;
-  background: transparent;
-  color: #667eea;
-  cursor: pointer;
-  font-weight: 600;
-  transition: all 0.3s ease;
-}
-
-.btn-register {
-  background: #667eea;
+  background: linear-gradient(45deg, #8B4513, #D2691E, #CD853F);
   color: white;
-}
-
-.btn-login:hover {
-  background: #667eea;
-  color: white;
-  transform: translateY(-2px);
-}
-
-.btn-register:hover {
-  background: #5a67d8;
-  transform: translateY(-2px);
-}
-
-/* 现代化英雄区域 */
-.modern-hero {
-  position: relative;
-  min-height: 90vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  text-align: center;
   overflow: hidden;
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 25%, #0f3460 50%, #533483 75%, #8b5cf6 100%);
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  max-width: 800px;
+  padding: 2rem;
+}
+
+.hero-title {
+  font-size: 3.5rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+  font-family: 'Noto Serif SC', 'SimSun', serif;
+}
+
+.hero-subtitle {
+  font-size: 1.5rem;
+  margin-bottom: 2rem;
+  opacity: 0.9;
+}
+
+.hero-stats {
+  display: flex;
+  justify-content: center;
+  gap: 3rem;
+  margin-bottom: 2rem;
+}
+
+.stat-item {
+  text-align: center;
+}
+
+.stat-number {
+  display: block;
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+.stat-label {
+  font-size: 1rem;
+  opacity: 0.8;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.btn {
+  padding: 0.75rem 2rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: inherit;
+}
+
+.btn-primary {
+  background: #FFD700;
+  color: #8B4513;
+  font-weight: bold;
+}
+
+.btn-primary:hover {
+  background: #FFC107;
+  transform: translateY(-2px);
+}
+
+.btn-secondary {
+  background: rgba(255,255,255,0.2);
+  color: white;
+  border: 2px solid white;
+}
+
+.btn-secondary:hover {
+  background: rgba(255,255,255,0.3);
 }
 
 .hero-background {
   position: absolute;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 1;
+  right: 0;
+  bottom: 0;
 }
 
-.background-overlay {
+.bg-pattern {
   position: absolute;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
-  background: 
-    radial-gradient(circle at 20% 30%, rgba(139, 92, 246, 0.3) 0%, transparent 50%),
-    radial-gradient(circle at 80% 70%, rgba(83, 52, 131, 0.4) 0%, transparent 50%),
-    radial-gradient(circle at 40% 50%, rgba(31, 41, 55, 0.6) 0%, transparent 50%);
-  animation: backgroundShift 15s ease-in-out infinite;
-}
-
-.chinese-pattern {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-image: 
-    radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.05) 2px, transparent 2px),
-    radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-  background-size: 50px 50px, 30px 30px;
+  right: 0;
+  bottom: 0;
+  background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23ffffff' fill-opacity='0.1' fill-rule='evenodd'/%3E%3C/svg%3E");
   opacity: 0.3;
 }
 
-.floating-elements {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  z-index: 2;
-}
-
-.floating-element {
-  position: absolute;
-  font-size: 4rem;
-  opacity: 0.6;
-  animation: float 8s ease-in-out infinite;
-  filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.3));
-  z-index: 2;
-}
-
-.element-1 { top: 15%; left: 8%; animation-delay: 0s; }
-.element-2 { top: 65%; right: 12%; animation-delay: 2s; }
-.element-3 { bottom: 25%; left: 15%; animation-delay: 4s; }
-.element-4 { top: 35%; right: 20%; animation-delay: 1s; }
-.element-5 { top: 8%; right: 25%; animation-delay: 3s; font-size: 3.5rem; }
-.element-6 { bottom: 15%; right: 8%; animation-delay: 5s; font-size: 3rem; }
-
-.hero-content {
+.featured-section, .popular-section, .quick-nav {
+  padding: 4rem 2rem;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 2rem;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 4rem;
-  align-items: center;
-  position: relative;
-  z-index: 3;
-}
-
-.hero-text {
-  color: white;
-}
-
-.title-container {
-  margin-bottom: 2rem;
-}
-
-.hero-title {
-  font-size: 3.5rem;
-  font-weight: 800;
-  line-height: 1.1;
-  margin-bottom: 1rem;
-  text-align: left;
-}
-
-.title-line {
-  display: block;
-  position: relative;
-}
-
-.title-line:first-child {
-  color: rgba(255, 255, 255, 0.95);
-  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.8);
-}
-
-.title-line.highlight {
-  background: linear-gradient(135deg, #ffd700 0%, #ff8c00 25%, #ff6b6b 50%, #8b5cf6 75%, #00bfff 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-size: 300% 300%;
-  animation: gradientShift 6s ease-in-out infinite;
-  text-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
-}
-
-.title-decoration {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-top: 1rem;
-}
-
-.decoration-line {
-  flex: 1;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
-}
-
-.decoration-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #ffd700;
-  box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
-}
-
-.hero-subtitle {
-  font-size: 1.4rem;
-  margin-bottom: 3rem;
-  line-height: 1.6;
-  color: rgba(255, 255, 255, 0.85);
-  font-weight: 400;
-  letter-spacing: 0.5px;
-  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.5);
-}
-
-.hero-stats {
-  display: flex;
-  gap: 2rem;
-  margin-bottom: 3rem;
-}
-
-.stat-item {
-  text-align: center;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(15px);
-  padding: 1.5rem;
-  border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  transition: all 0.4s ease;
-  min-width: 120px;
-}
-
-.stat-item:hover {
-  transform: translateY(-5px);
-  background: rgba(255, 255, 255, 0.15);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-}
-
-.stat-icon {
-  font-size: 2rem;
-  margin-bottom: 0.5rem;
-  display: block;
-}
-
-.stat-number {
-  display: block;
-  font-size: 2.2rem;
-  font-weight: 700;
-  margin-bottom: 0.25rem;
-  color: white;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
-}
-
-.stat-label {
-  font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.8);
-  font-weight: 500;
-}
-
-.hero-search {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
-  border-radius: 20px;
-  padding: 2.5rem;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
-}
-
-.search-wrapper {
-  display: flex;
-  gap: 1rem;
-  align-items: center;
-}
-
-.modern-search-input {
-  flex: 1;
-  padding: 1rem 1.5rem;
-  border: 2px solid #e2e8f0;
-  border-radius: 12px;
-  background: white;
-  font-size: 1rem;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-}
-
-.modern-search-input:focus {
-  outline: none;
-  border-color: #8b5cf6;
-  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
-}
-
-.modern-search-btn {
-  padding: 1rem 2rem;
-  background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
-  color: white;
-  border: none;
-  border-radius: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
-}
-
-.modern-search-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
-}
-
-.search-icon {
-  font-size: 1.1rem;
-}
-
-/* 精选诗词区域 */
-.featured-section {
-  padding: 6rem 0;
-  background: white;
-}
-
-.container {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 0 2rem;
 }
 
 .section-header {
   text-align: center;
-  margin-bottom: 4rem;
+  margin-bottom: 3rem;
 }
 
-.section-title {
-  font-size: 3rem;
-  font-weight: 800;
-  color: #2d3748;
+.section-header h2 {
+  font-size: 2.5rem;
+  color: #8B4513;
   margin-bottom: 1rem;
 }
 
-.section-subtitle {
+.section-header p {
   font-size: 1.2rem;
-  color: #718096;
+  color: #666;
 }
 
-.featured-grid {
+.featured-poems {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
   gap: 2rem;
 }
 
-.featured-card {
+.poem-card {
   background: white;
-  border-radius: 20px;
-  overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   cursor: pointer;
   transition: all 0.3s ease;
-  position: relative;
-  animation: slideUp 0.6s ease-out forwards;
-  opacity: 0;
-  transform: translateY(30px);
+  border: 1px solid #e0e0e0;
 }
 
-.featured-card:hover {
-  transform: translateY(-10px);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-}
-
-.card-gradient {
-  height: 120px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-}
-
-.card-content {
-  padding: 2rem;
-}
-
-.poem-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
+.poem-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
 }
 
 .poem-title {
-  color: #2d3748;
-  font-size: 1.4rem;
-  font-weight: 700;
-  margin: 0;
-}
-
-.poem-badge {
-  background: #e2e8f0;
-  color: #4a5568;
-  padding: 0.25rem 0.75rem;
-  border-radius: 15px;
-  font-size: 0.8rem;
-  font-weight: 600;
+  font-size: 1.5rem;
+  color: #8B4513;
+  margin-bottom: 0.5rem;
+  font-family: 'Noto Serif SC', 'SimSun', serif;
 }
 
 .poem-author {
-  color: #718096;
-  font-size: 1rem;
-  margin-bottom: 1.5rem;
+  color: #666;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+  font-family: 'Noto Serif SC', 'SimSun', serif;
 }
 
 .poem-excerpt {
-  color: #4a5568;
-  line-height: 1.8;
-  font-style: italic;
-  margin-bottom: 1.5rem;
+  color: #333;
+  line-height: 1.6;
+  margin-bottom: 1rem;
+  font-family: 'Noto Serif SC', 'SimSun', serif;
 }
 
-.card-footer {
+.poem-meta {
   display: flex;
   justify-content: space-between;
   align-items: center;
-}
-
-.read-more {
-  color: #667eea;
-  font-weight: 600;
-  transition: all 0.3s ease;
-}
-
-.featured-card:hover .read-more {
-  transform: translateX(5px);
-}
-
-/* 分类展示区域 */
-.categories-section {
-  padding: 6rem 0;
-  background: #f7fafc;
-}
-
-.categories-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1.5rem;
-}
-
-.category-card {
-  background: white;
-  border-radius: 15px;
-  padding: 2rem;
-  text-align: center;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-  cursor: pointer;
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
-}
-
-.category-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.12);
-}
-
-.category-content {
-  position: relative;
-  z-index: 2;
-}
-
-.category-icon {
-  font-size: 3.5rem;
-  margin-bottom: 1rem;
-  display: block;
-}
-
-.category-name {
-  color: #2d3748;
-  font-size: 1.3rem;
-  font-weight: 700;
-  margin-bottom: 0.5rem;
-}
-
-.category-count {
-  color: #718096;
   font-size: 0.9rem;
-}
-
-.category-hover {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  transition: all 0.3s ease;
-  transform: translateY(100%);
-}
-
-.category-card:hover .category-hover {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.category-hover span {
-  color: white;
-  font-weight: 600;
-  font-size: 1.1rem;
-}
-
-/* 热门诗词区域 */
-.popular-section {
-  padding: 6rem 0;
-  background: white;
+  color: #888;
 }
 
 .popular-list {
-  max-width: 800px;
-  margin: 0 auto;
-}
-
-.popular-item {
-  display: flex;
-  align-items: center;
-  padding: 1.5rem;
-  background: white;
-  border-radius: 15px;
-  margin-bottom: 1rem;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.popular-item:hover {
-  transform: translateX(10px);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
-}
-
-.rank-badge {
-  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
-  color: white;
-  padding: 0.5rem 1rem;
-  border-radius: 20px;
-  margin-right: 1.5rem;
-}
-
-.rank-number {
-  font-weight: 700;
-  font-size: 1.1rem;
-}
-
-.poem-info {
-  flex: 1;
-}
-
-.poem-title {
-  color: #2d3748;
-  font-size: 1.2rem;
-  font-weight: 600;
-  margin-bottom: 0.25rem;
-}
-
-.poem-author {
-  color: #718096;
-  font-size: 0.9rem;
-}
-
-.popular-stats {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.stat {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-  color: #718096;
-  font-size: 0.9rem;
-}
-
-.stat-icon {
-  font-size: 1rem;
-}
-
-/* 现代化页脚 */
-.modern-footer {
-  background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
-  color: white;
-  padding: 4rem 0 2rem;
-}
-
-.footer-content {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 0 2rem;
-}
-
-.footer-main {
-  display: grid;
-  grid-template-columns: 1fr 2fr;
-  gap: 4rem;
-  margin-bottom: 3rem;
-}
-
-.footer-brand {
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
 
-.footer-logo-icon {
-  font-size: 3rem;
-}
-
-.footer-brand h3 {
-  font-size: 2rem;
-  font-weight: 700;
-  margin: 0;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.footer-brand p {
-  opacity: 0.8;
-  line-height: 1.6;
-}
-
-.footer-links {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 2rem;
-}
-
-.link-group h4 {
-  font-size: 1.1rem;
-  font-weight: 600;
-  margin-bottom: 1rem;
-  color: #e2e8f0;
-}
-
-.link-group a {
-  display: block;
-  color: #a0aec0;
-  text-decoration: none;
-  margin-bottom: 0.5rem;
-  transition: color 0.3s ease;
-}
-
-.link-group a:hover {
-  color: #667eea;
-}
-
-.footer-bottom {
+.popular-item {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding-top: 2rem;
-  border-top: 1px solid #4a5568;
-}
-
-.social-links {
-  display: flex;
-  gap: 1rem;
-}
-
-.social-link {
-  color: #a0aec0;
-  text-decoration: none;
-  padding: 0.5rem 1rem;
-  border: 1px solid #4a5568;
-  border-radius: 20px;
+  background: white;
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  cursor: pointer;
   transition: all 0.3s ease;
 }
 
-.social-link:hover {
-  color: #667eea;
-  border-color: #667eea;
+.popular-item:hover {
+  transform: translateX(5px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
 }
 
-/* 动画定义 */
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-20px); }
+.rank {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #8B4513;
+  min-width: 40px;
 }
 
-@keyframes slideUp {
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.poem-info {
+  flex: 1;
+  margin: 0 1.5rem;
 }
 
-@keyframes textGlow {
-  0% {
-    text-shadow: 0 0 20px rgba(255, 255, 255, 0.5),
-                 0 0 40px rgba(255, 255, 255, 0.3),
-                 0 0 60px rgba(255, 255, 255, 0.1);
-  }
-  100% {
-    text-shadow: 0 0 30px rgba(255, 255, 255, 0.8),
-                 0 0 60px rgba(255, 255, 255, 0.5),
-                 0 0 80px rgba(255, 255, 255, 0.2);
-  }
+.poem-info h4 {
+  margin: 0;
+  color: #333;
+  font-size: 1.1rem;
 }
 
-@keyframes gradientShift {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
+.poem-info .poem-meta {
+  margin: 0.25rem 0 0 0;
+  color: #666;
 }
 
-@keyframes fadeInUp {
-  0% {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.views {
+  color: #888;
+  font-size: 0.9rem;
 }
 
-@keyframes glowPulse {
-  0%, 100% {
-    opacity: 0.5;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.8;
-    transform: scale(1.05);
-  }
+.nav-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
 }
 
-@keyframes backgroundShift {
-  0%, 100% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
+.nav-item {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
 }
 
-@keyframes shimmer {
-  0%, 100% {
-    transform: translateX(-100%);
-  }
-  50% {
-    transform: translateX(100%);
-  }
+.nav-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 15px rgba(0,0,0,0.2);
 }
 
-@keyframes subtlePulse {
-  0%, 100% {
-    opacity: 0.3;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.5;
-    transform: scale(1.02);
-  }
+.nav-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
 }
 
-/* 响应式设计 */
-@media (max-width: 1024px) {
-  .hero-content {
-    grid-template-columns: 1fr;
-    text-align: center;
-    gap: 3rem;
-  }
-  
-  .hero-title {
-    font-size: 3rem;
-  }
-  
-  .featured-grid {
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  }
+.nav-item h3 {
+  color: #8B4513;
+  margin-bottom: 0.5rem;
+}
+
+.nav-item p {
+  color: #666;
+  margin: 0;
+}
+
+.loading, .no-data {
+  text-align: center;
+  padding: 3rem;
+  font-size: 1.2rem;
+  color: #666;
 }
 
 @media (max-width: 768px) {
-  .nav-container {
-    flex-direction: column;
-    gap: 1rem;
-    padding: 1rem;
-  }
-  
-  .nav-menu {
-    gap: 1rem;
-  }
-  
-  .nav-actions {
-    flex-direction: column;
-    gap: 1rem;
-  }
-  
-  .search-input {
-    width: 200px;
-  }
-  
   .hero-title {
     font-size: 2.5rem;
   }
@@ -1224,42 +471,17 @@ const deactivateCategory = () => {
     gap: 1rem;
   }
   
-  .search-container {
+  .hero-actions {
     flex-direction: column;
+    gap: 0.5rem;
   }
   
-  .footer-main {
-    grid-template-columns: 1fr;
-    gap: 2rem;
-  }
-  
-  .footer-links {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
-  }
-  
-  .footer-bottom {
-    flex-direction: column;
-    gap: 1rem;
-    text-align: center;
-  }
-}
-
-@media (max-width: 480px) {
-  .featured-grid {
+  .featured-poems {
     grid-template-columns: 1fr;
   }
   
-  .categories-grid {
+  .nav-grid {
     grid-template-columns: 1fr;
-  }
-  
-  .hero-title {
-    font-size: 2rem;
-  }
-  
-  .section-title {
-    font-size: 2rem;
   }
 }
 </style>

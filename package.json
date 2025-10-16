@@ -6,7 +6,11 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "import-data": "node scripts/import_poems.js",
+    "supabase:login": "supabase login",
+    "supabase:link": "supabase link",
+    "supabase:push": "supabase db push"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.75.0",
@@ -23,7 +27,8 @@
     "vue3",
     "vite",
     "诗词",
-    "赏析"
+    "赏析",
+    "supabase"
   ],
   "author": "诗词赏析项目组",
   "license": "MIT"

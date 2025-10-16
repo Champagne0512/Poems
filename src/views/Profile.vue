@@ -1,77 +1,89 @@
 <template>
   <div class="profile">
-    <div class="page-header">
-      <div class="header-content">
-        <h1>个人中心</h1>
-        <p>管理您的诗词收藏和偏好设置</p>
+    <div class="profile-header">
+      <div class="user-info">
+        <div class="avatar">
+          <img :src="user.avatar" :alt="user.name" />
+        </div>
+        <div class="user-details">
+          <h1>{{ user.name }}</h1>
+          <p class="user-bio">{{ user.bio }}</p>
+          <div class="user-stats">
+            <div class="stat">
+              <span class="stat-number">{{ userStats.collections }}</span>
+              <span class="stat-label">收藏</span>
+            </div>
+            <div class="stat">
+              <span class="stat-number">{{ userStats.comments }}</span>
+              <span class="stat-label">评论</span>
+            </div>
+            <div class="stat">
+              <span class="stat-number">{{ userStats.views }}</span>
+              <span class="stat-label">浏览</span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
-    
+
     <div class="profile-content">
-      <div class="profile-sidebar">
-        <div class="user-info">
-          <div class="avatar">
-            <img src="/images/OIP.jpg" alt="用户头像" class="avatar-img">
-          </div>
-          <h3 class="username">诗词爱好者</h3>
-          <p class="user-bio">热爱古典诗词，传承中华文化</p>
-        </div>
-        
-        <nav class="profile-nav">
-          <button 
-            v-for="tab in tabs" 
-            :key="tab.id"
-            @click="activeTab = tab.id"
-            :class="['nav-item', { active: activeTab === tab.id }]"
-          >
-            {{ tab.label }}
-          </button>
-        </nav>
+      <div class="tabs">
+        <button 
+          v-for="tab in tabs" 
+          :key="tab.id"
+          :class="['tab', { active: activeTab === tab.id }]"
+          @click="activeTab = tab.id"
+        >
+          {{ tab.label }}
+        </button>
       </div>
-      
-      <div class="profile-main">
-        <div v-if="activeTab === 'favorites'" class="tab-content">
+
+      <div class="tab-content">
+        <!-- 收藏的诗词 -->
+        <div v-if="activeTab === 'collections'" class="collections">
           <h2>我的收藏</h2>
-          <div v-if="favorites.length === 0" class="empty-state">
+          <div v-if="collections.length > 0" class="collection-list">
+            <div v-for="poem in collections" :key="poem.id" class="collection-item" @click="viewPoem(poem.id)">
+              <h3>{{ poem.title }}</h3>
+              <p>{{ poem.author }} · {{ poem.dynasty }}</p>
+              <button class="remove-btn" @click.stop="removeCollection(poem.id)">取消收藏</button>
+            </div>
+          </div>
+          <div v-else class="empty-state">
             <p>暂无收藏的诗词</p>
           </div>
-          <div v-else class="favorites-list">
-            <div v-for="poem in favorites" :key="poem.id" class="favorite-item">
-              <div class="poem-info">
-                <h4>{{ poem.title }}</h4>
-                <p>{{ poem.author }} · {{ poem.dynasty }}</p>
+        </div>
+
+        <!-- 我的评论 -->
+        <div v-if="activeTab === 'comments'" class="comments">
+          <h2>我的评论</h2>
+          <div v-if="userComments.length > 0" class="comment-list">
+            <div v-for="comment in userComments" :key="comment.id" class="comment-item">
+              <div class="comment-header">
+                <span class="poem-title" @click="viewPoem(comment.poemId)">{{ comment.poemTitle }}</span>
+                <span class="comment-time">{{ comment.time }}</span>
               </div>
-              <button @click="removeFavorite(poem.id)" class="remove-btn">移除</button>
+              <p class="comment-content">{{ comment.content }}</p>
+              <button class="delete-btn" @click="deleteComment(comment.id)">删除</button>
             </div>
           </div>
-        </div>
-        
-        <div v-if="activeTab === 'settings'" class="tab-content">
-          <h2>偏好设置</h2>
-          <div class="setting-item">
-            <label>
-              <input type="checkbox" v-model="settings.darkMode" />
-              深色模式
-            </label>
-          </div>
-          <div class="setting-item">
-            <label>
-              <input type="checkbox" v-model="settings.autoPlay" />
-              自动播放音频
-            </label>
+          <div v-else class="empty-state">
+            <p>暂无评论</p>
           </div>
         </div>
-        
-        <div v-if="activeTab === 'history'" class="tab-content">
+
+        <!-- 浏览历史 -->
+        <div v-if="activeTab === 'history'" class="history">
           <h2>浏览历史</h2>
-          <div v-if="history.length === 0" class="empty-state">
-            <p>暂无浏览历史</p>
-          </div>
-          <div v-else class="history-list">
-            <div v-for="item in history" :key="item.id" class="history-item">
-              <span>{{ item.title }}</span>
-              <small>{{ formatDate(item.timestamp) }}</small>
+          <div v-if="browseHistory.length > 0" class="history-list">
+            <div v-for="item in browseHistory" :key="item.id" class="history-item" @click="viewPoem(item.poemId)">
+              <h3>{{ item.poemTitle }}</h3>
+              <p>{{ item.author }} · {{ item.dynasty }}</p>
+              <span class="view-time">{{ item.time }}</span>
             </div>
+          </div>
+          <div v-else class="empty-state">
+            <p>暂无浏览历史</p>
           </div>
         </div>
       </div>
@@ -81,296 +93,324 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { useSupabaseStore } from '../stores/supabase'
+import { useRouter } from 'vue-router'
+import { supabase } from '@/utils/supabase'
 
-const supabaseStore = useSupabaseStore()
+const router = useRouter()
 
-const activeTab = ref('favorites')
-const favorites = ref([])
-const history = ref([])
-const settings = ref({
-  darkMode: false,
-  autoPlay: true
+// 用户信息
+const user = ref({
+  name: '诗词爱好者',
+  avatar: '/api/placeholder/avatar/80',
+  bio: '热爱中国古典诗词，喜欢在诗词中寻找生活的诗意。'
 })
 
-const tabs = [
-  { id: 'favorites', label: '我的收藏' },
-  { id: 'history', label: '浏览历史' },
-  { id: 'settings', label: '偏好设置' }
-]
+const userStats = ref({
+  collections: 0,
+  comments: 0,
+  views: 0
+})
+
+const tabs = ref([
+  { id: 'collections', label: '我的收藏' },
+  { id: 'comments', label: '我的评论' },
+  { id: 'history', label: '浏览历史' }
+])
+
+const activeTab = ref('collections')
+
+const collections = ref([])
+const userComments = ref([])
+const browseHistory = ref([])
+const isLoading = ref(false)
 
 onMounted(async () => {
-  await loadFavorites()
-  await loadHistory()
+  isLoading.value = true
+  try {
+    // 加载用户数据
+    await loadUserData()
+  } catch (error) {
+    console.error('加载用户数据失败:', error)
+  } finally {
+    isLoading.value = false
+  }
 })
 
-const loadFavorites = async () => {
+const loadUserData = async () => {
   try {
-    favorites.value = await supabaseStore.getFavorites()
+    console.log('开始加载用户数据...')
+    
+    // 由于用户认证功能尚未完全实现，这里使用模拟数据
+    // 在实际应用中，这里应该获取当前登录用户的数据
+    
+    // 模拟收藏列表
+    const { data: favoriteData, error: favoriteError } = await supabase
+      .from('poems')
+      .select('*')
+      .limit(3)
+    
+    if (!favoriteError) {
+      collections.value = favoriteData || []
+    }
+    
+    // 模拟用户评论
+    userComments.value = [
+      {
+        id: 1,
+        poemId: 1,
+        poemTitle: '静夜思',
+        content: '这首诗意境优美，读来令人回味无穷。',
+        time: '2024-01-15'
+      },
+      {
+        id: 2,
+        poemId: 2,
+        poemTitle: '春晓',
+        content: '孟浩然的诗作清新自然，充满生活气息。',
+        time: '2024-01-14'
+      }
+    ]
+    
+    // 模拟浏览历史
+    const { data: historyData, error: historyError } = await supabase
+      .from('poems')
+      .select('*')
+      .limit(5)
+    
+    if (!historyError) {
+      browseHistory.value = (historyData || []).map(poem => ({
+        id: poem.id,
+        poemId: poem.id,
+        poemTitle: poem.title,
+        author: poem.author,
+        dynasty: poem.dynasty,
+        time: new Date().toLocaleDateString()
+      }))
+    }
+    
+    // 更新统计数据
+    userStats.value.collections = collections.value.length
+    userStats.value.comments = userComments.value.length
+    userStats.value.views = browseHistory.value.length
+    
+    console.log('用户数据加载完成:', {
+      collections: collections.value.length,
+      comments: userComments.value.length,
+      history: browseHistory.value.length
+    })
   } catch (error) {
-    console.error('加载收藏失败:', error)
+    console.error('加载用户数据失败:', error)
   }
 }
 
-const loadHistory = async () => {
+const viewPoem = (poemId) => {
+  router.push(`/poem/${poemId}`)
+}
+
+const removeCollection = async (poemId) => {
   try {
-    history.value = await supabaseStore.getHistory()
+    console.log('取消收藏诗词，ID:', poemId)
+    // 在实际应用中，这里应该调用Supabase API删除收藏记录
+    collections.value = collections.value.filter(poem => poem.id !== poemId)
+    userStats.value.collections = collections.value.length
   } catch (error) {
-    console.error('加载历史失败:', error)
+    console.error('取消收藏失败:', error)
   }
 }
 
-const removeFavorite = async (poemId) => {
+const deleteComment = async (commentId) => {
   try {
-    await supabaseStore.removeFavorite(poemId)
-    favorites.value = favorites.value.filter(p => p.id !== poemId)
+    console.log('删除评论，ID:', commentId)
+    // 在实际应用中，这里应该调用Supabase API删除评论记录
+    userComments.value = userComments.value.filter(comment => comment.id !== commentId)
+    userStats.value.comments = userComments.value.length
   } catch (error) {
-    console.error('移除收藏失败:', error)
+    console.error('删除评论失败:', error)
   }
-}
-
-const formatDate = (timestamp) => {
-  return new Date(timestamp).toLocaleString('zh-CN')
 }
 </script>
 
 <style scoped>
 .profile {
-  font-family: 'STKaiti', 'KaiTi', 'SimSun', serif;
-  background: linear-gradient(135deg, #8B7355 0%, #A1887F 50%, #BCAAA4 100%);
-  min-height: 100vh;
-  padding: 0;
-  position: relative;
-  overflow: hidden;
+  font-family: var(--font-ui);
+  background: var(--bg-color);
+  min-height: calc(100vh - 160px);
+  padding: 2rem 0;
 }
 
-.profile::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: 
-    radial-gradient(circle at 20% 80%, rgba(139, 115, 85, 0.1) 0%, transparent 50%),
-    radial-gradient(circle at 80% 20%, rgba(161, 136, 127, 0.1) 0%, transparent 50%),
-    url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="%23ffffff" opacity="0.05"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
-  pointer-events: none;
-}
-
-.page-header {
-  background: rgba(255, 255, 255, 0.98);
-  backdrop-filter: blur(20px);
-  padding: 3rem 0;
-  margin-bottom: 0;
-  border-bottom: 1px solid rgba(139, 115, 85, 0.2);
-  box-shadow: 0 4px 20px rgba(139, 115, 85, 0.1);
-  position: relative;
-  z-index: 1;
-}
-
-.header-content {
-  max-width: 1200px;
+.profile-container {
+  max-width: 800px;
   margin: 0 auto;
   padding: 0 2rem;
-  text-align: center;
 }
 
-.page-header h1 {
-  color: #5D4037;
-  margin: 0 0 1rem 0;
-  font-size: 3rem;
-  font-weight: 700;
-  text-shadow: 2px 2px 4px rgba(139, 115, 85, 0.3);
-  letter-spacing: 2px;
-}
-
-.page-header p {
-  color: #8B7355;
-  font-size: 1.2rem;
-  margin: 0;
-  font-style: italic;
-}
-
-.profile-content {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 3rem 2rem;
-  display: grid;
-  grid-template-columns: 300px 1fr;
-  gap: 2rem;
-  position: relative;
-  z-index: 1;
-}
-
-.profile-sidebar {
-  background: rgba(255, 255, 255, 0.98);
-  backdrop-filter: blur(20px);
-  border-radius: 15px;
+.profile-header {
+  background: var(--card-bg);
   padding: 2rem;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(139, 115, 85, 0.1);
+  border-radius: 12px;
+  box-shadow: 0 4px 20px var(--shadow-color);
+  margin-bottom: 2rem;
+  border: 1px solid var(--border-color);
 }
 
 .user-info {
-  text-align: center;
-  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 2rem;
 }
 
-.avatar {
-  width: 100px;
-  height: 100px;
-  margin: 0 auto 1rem;
+.avatar img {
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
-  overflow: hidden;
-  border: 4px solid #8B7355;
+  background: var(--bg-color);
+  border: 2px solid var(--primary-color);
 }
 
-.avatar-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.username {
-  color: #5D4037;
+.user-details h1 {
   margin: 0 0 0.5rem 0;
-  font-size: 1.4rem;
-  font-weight: 700;
+  color: var(--accent-color);
+  font-family: var(--font-ui);
 }
 
 .user-bio {
-  color: #8B7355;
-  margin: 0;
-  font-style: italic;
+  color: var(--secondary-color);
+  margin-bottom: 1rem;
+  font-family: var(--font-ui);
 }
 
-.profile-nav {
+.user-stats {
   display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+  gap: 2rem;
 }
 
-.nav-item {
-  padding: 1rem;
-  border: none;
-  background: transparent;
-  color: #5D4037;
-  text-align: left;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.3s;
-  font-size: 1.1rem;
-  font-weight: 600;
-}
-
-.nav-item:hover {
-  background: rgba(139, 115, 85, 0.1);
-}
-
-.nav-item.active {
-  background: linear-gradient(135deg, #8B7355, #A1887F);
-  color: white;
-}
-
-.profile-main {
-  background: rgba(255, 255, 255, 0.98);
-  backdrop-filter: blur(20px);
-  border-radius: 15px;
-  padding: 2rem;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(139, 115, 85, 0.1);
-}
-
-.tab-content h2 {
-  color: #5D4037;
-  margin: 0 0 2rem 0;
-  font-size: 2rem;
-  font-weight: 700;
-}
-
-.empty-state {
+.stat {
   text-align: center;
-  padding: 3rem;
-  color: #8B7355;
-  font-style: italic;
 }
 
-.favorites-list, .history-list {
+.stat-number {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--primary-color);
+  font-family: var(--font-ui);
+}
+
+.stat-label {
+  font-size: 0.9rem;
+  color: var(--secondary-color);
+  font-family: var(--font-ui);
+}
+
+.tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 2rem;
+}
+
+.tab {
+  padding: 1rem 2rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.3s ease;
+  color: var(--primary-color);
+  font-family: var(--font-ui);
+}
+
+.tab.active {
+  border-bottom-color: var(--primary-color);
+  color: var(--accent-color);
+  font-weight: bold;
+}
+
+.tab:hover {
+  background: var(--bg-color);
+}
+
+.collection-list,
+.comment-list,
+.history-list {
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
 
-.favorite-item, .history-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem;
-  background: rgba(139, 115, 85, 0.05);
-  border-radius: 8px;
-  border: 1px solid rgba(139, 115, 85, 0.1);
+.collection-item,
+.comment-item,
+.history-item {
+  background: var(--card-bg);
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px var(--shadow-color);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  border: 1px solid var(--border-color);
 }
 
-.poem-info h4 {
-  margin: 0 0 0.5rem 0;
-  color: #5D4037;
-  font-size: 1.2rem;
+.collection-item:hover,
+.comment-item:hover,
+.history-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(93, 64, 55, 0.15);
 }
 
-.poem-info p {
-  margin: 0;
-  color: #8B7355;
-  font-size: 0.9rem;
-}
-
-.remove-btn {
-  padding: 0.5rem 1rem;
-  background: #e74c3c;
+.remove-btn,
+.delete-btn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  padding: 0.25rem 0.5rem;
+  background: var(--secondary-color);
   color: white;
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
+  transition: all 0.3s ease;
+  font-family: var(--font-ui);
 }
 
-.setting-item {
-  margin-bottom: 1.5rem;
+.remove-btn:hover,
+.delete-btn:hover {
+  background: #8d6e63;
+  transform: translateY(-1px);
 }
 
-.setting-item label {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: #5D4037;
-  font-size: 1.1rem;
-  cursor: pointer;
-}
-
-.setting-item input {
-  width: 18px;
-  height: 18px;
-}
-
-.history-item {
+.comment-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  margin-bottom: 0.5rem;
 }
 
-.history-item small {
-  color: #8B7355;
-  font-size: 0.8rem;
+.poem-title {
+  color: var(--primary-color);
+  cursor: pointer;
+  font-weight: bold;
+  font-family: 'Noto Serif SC', 'SimSun', serif;
 }
 
-@media (max-width: 768px) {
-  .profile-content {
-    grid-template-columns: 1fr;
-    padding: 0 1rem;
-  }
-  
-  .profile-sidebar {
-    margin-bottom: 2rem;
-  }
+.poem-title:hover {
+  text-decoration: underline;
+}
+
+.comment-time,
+.view-time {
+  color: var(--secondary-color);
+  font-size: 0.9rem;
+  font-family: var(--font-ui);
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem;
+  color: var(--secondary-color);
+  background: var(--card-bg);
+  border-radius: 12px;
+  box-shadow: 0 4px 20px var(--shadow-color);
+  border: 1px solid var(--border-color);
+  font-family: var(--font-ui);
 }
 </style>
