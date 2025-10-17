@@ -13,11 +13,8 @@ import { usePoemStore } from './stores/poemStore.js'
 // 创建Pinia实例
 const pinia = createPinia()
 
-// 创建路由实例
-const router = createRouter({
-  history: createWebHistory(),
-  routes
-})
+// 使用路由配置
+import router from './router/index.js'
 
 // 创建Vue应用
 const app = createApp(App)
