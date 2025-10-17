@@ -31,6 +31,7 @@
     <!-- 统一古风页脚 -->
     <footer class="unified-footer">
       <div class="footer-container">
+    <AIFloatingAssistant />
         <div class="footer-content">
           <div class="footer-brand">
             <span class="footer-logo-icon">📜</span>
@@ -73,6 +74,7 @@
 </template>
 
 <script setup>
+import AIFloatingAssistant from './components/AIFloatingAssistant.vue'
 // 应用主组件
 </script>
 

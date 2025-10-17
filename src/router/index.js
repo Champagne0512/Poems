@@ -7,6 +7,7 @@ import PoemDetail from '../views/PoemDetail.vue'
 import Search from '../views/Search.vue'
 import Profile from '../views/Profile.vue'
 
+
 const routes = [
   {
     path: '/',
@@ -33,7 +34,8 @@ const routes = [
     path: '/profile',
     name: 'Profile',
     component: Profile
-  }
+  },
+
 ]
 
 const router = createRouter({
