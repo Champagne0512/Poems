@@ -12,11 +12,14 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
-    assetsDir: 'assets'
+    assetsDir: 'assets',
+    sourcemap: false,
+    minify: 'terser'
   },
   resolve: {
     alias: {
       '@': resolve(__dirname, 'src')
     }
-  }
+  },
+  base: './'
 })
