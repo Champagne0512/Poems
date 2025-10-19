@@ -1,2 +1,3 @@
-# 这个文件明确声明项目中没有子模块
-# 用于解决Netlify构建时的子模块检出错误
+[submodule "Poems"]
+	path = Poems
+	url = https://github.com/Champagne0512/Poems.git
